@@ -24,6 +24,10 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
     on<getAllNVTH>(_onGetAllNVTH);
     on<UploadFileEvent>(_onUploadFile);
     on<LoadCVCByIdCVEvent>(_onLoadCVCByIdCV);
+    on<UpdateCVCEvent>(_onUpdateCVC);
+    on<InsertCVCEvent>(_onInsertCVC);
+    on<LoadAllCVC_Event>(_onLoadAllCVC);
+    on<DeleteCVCEvent>(_onDeleteCVC);
   }
 
   Future<void> _onLoadCongViec(
@@ -212,6 +216,25 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
     }
   }
 
+
+  Future<void> _onLoadAllCVC(
+    LoadAllCVC_Event event,
+    Emitter<CongViecState> emit,
+  ) async {
+      try {
+        final congViecs = await repository.LoadAllCVC();
+        emit(LoadCVC(
+           congViecs,
+        ));
+      } catch (e) {
+        emit(CongViecError(
+          e.toString(),
+          errorTime: DateTime.now(),
+        ));
+      }
+    
+  }
+  
   Future<void> _onLoadCVCByIdCV(
     LoadCVCByIdCVEvent event,
     Emitter<CongViecState> emit,
@@ -219,6 +242,57 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
     try {
       final cvc_repository = await repository.LoadCVCByIdCV(event.id_CongViec);
       emit(LoadCVCByIdCV(
+        cvc_repository,
+      ));
+    } catch (e) {
+      emit(CongViecError(
+        e.toString(),
+        errorTime: DateTime.now(),
+      ));
+    }
+  }
+
+  Future<void> _onUpdateCVC(
+    UpdateCVCEvent event,
+    Emitter<CongViecState> emit,
+  ) async {
+    try {
+      final cvc_repository = await repository.UpdateCVC(event.cvc);
+      emit(updateCVC_State(
+        cvc_repository,
+      ));
+    } catch (e) {
+      emit(CongViecError(
+        e.toString(),
+        errorTime: DateTime.now(),
+      ));
+    }
+  }
+
+  Future<void> _onInsertCVC(
+    InsertCVCEvent event,
+    Emitter<CongViecState> emit,
+  ) async {
+    try {
+      event.cvc.id="";
+      final cvc_repository = await repository.insertCVC(event.cvc);
+      emit(insertCVC_State(
+        cvc_repository,
+      ));
+    } catch (e) {
+      emit(CongViecError(
+        e.toString(),
+        errorTime: DateTime.now(),
+      ));
+    }
+  }
+  Future<void> _onDeleteCVC(
+    DeleteCVCEvent event,
+    Emitter<CongViecState> emit,
+  ) async {
+    try {
+      final cvc_repository = await repository.deleteCVC(event.id,event.userName);
+      emit(deleteCVC_State(
         cvc_repository,
       ));
     } catch (e) {

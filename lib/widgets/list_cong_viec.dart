@@ -1,6 +1,7 @@
 import 'package:ducanherp/blocs/congviec/congviec_bloc.dart';
 import 'package:ducanherp/blocs/congviec/congviec_event.dart';
 import 'package:ducanherp/models/congviec_model.dart';
+import 'package:ducanherp/models/congvieccon_model.dart';
 import 'package:ducanherp/screens/them_congviec.dart';
 import 'package:ducanherp/widgets/list_item.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ListCongViec extends StatelessWidget {
   final List<CongViecModel> items;
+  final List<CongViecConModel> item_cvcs;
   final Future<void> Function() onRefresh; // thêm callback onRefresh
 
   const ListCongViec({
     super.key,
     required this.items,
+    required this.item_cvcs,
     required this.onRefresh,
   });
 
@@ -25,8 +28,10 @@ class ListCongViec extends StatelessWidget {
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
+          final cvcs = this.item_cvcs.where((cv) => cv.idCongViec == item.id).toList();
           return ListItem(
             congViec: item,
+            item_cvcs: cvcs,
             onEdit: (context) {
               Navigator.push(
                 context,

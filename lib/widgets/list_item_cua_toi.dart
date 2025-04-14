@@ -187,8 +187,8 @@ Future<bool?> _showCongViecModal(
     builder: (context) {
       return BlocListener<CongViecBloc, CongViecState>(
         listener: (context, state) {
-          if (state is CongViecUpdated) {
-            Navigator.pop(context, true);
+          if (state is LoadCVC) {
+            context.read<CongViecBloc>().add(LoadCVCByIdCVEvent(congViec.id));
             if (onRefresh != null) onRefresh();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('✅ Cập nhật công việc thành công')),
@@ -358,7 +358,7 @@ Future<bool?> _showCongViecModal(
                                                     onChanged: (bool? value) {
                                                       // Toggle giá trị
                                                       cvc.hoanThanh = value == true ? 1 : 0;
-                                                      // Gọi setState nếu cần cập nhật UI (nếu trong StatefulWidget)
+                                                      context.read<CongViecBloc>().add(UpdateCVCEvent(cvc));
                                                     },
                                                   ),
                                                 ),
@@ -374,7 +374,7 @@ Future<bool?> _showCongViecModal(
                               } else if (state is CongViecError) {
                                 return Text('Lỗi: ${state.message}');
                               } else {
-                                return Center(child: CircularProgressIndicator());
+                                return SizedBox(height: 10,);
                               }
                             },
                           ),

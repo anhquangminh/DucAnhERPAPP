@@ -1,14 +1,23 @@
+
+import 'package:ducanherp/models/congvieccon_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ducanherp/models/congviec_model.dart';
+import 'package:ducanherp/blocs/congviec/congviec_bloc.dart';
+import 'package:ducanherp/blocs/congviec/congviec_event.dart';
 import 'package:ducanherp/utils/date_utils.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:ducanherp/widgets/sub_tasks_widget.dart';
 
 class ListItem extends StatelessWidget {
   final CongViecModel congViec;
+  final List<CongViecConModel> item_cvcs;
   final Function(BuildContext) onEdit;
   final Function(BuildContext) onDelete;
 
   const ListItem({
     super.key,
+    required this.item_cvcs,
     required this.congViec,
     required this.onEdit,
     required this.onDelete,
@@ -16,90 +25,84 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity, // Đảm bảo chiều rộng xác định
-      margin: EdgeInsets.only(bottom: 10),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(color: Colors.grey.shade300, blurRadius: 5, offset: Offset(2, 2)),
+    return Padding(padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8), 
+    child: Slidable(
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        children: [
+          SlidableAction(
+            onPressed: (context) => onEdit(context),
+            backgroundColor: Colors.teal,
+            icon: Icons.edit,
+            label: 'Sửa',
+          ),
+          SlidableAction(
+            onPressed: (context) => onDelete(context),
+            backgroundColor: Colors.redAccent,
+            icon: Icons.delete,
+            label: 'Xóa',
+          ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded( // Để nội dung không bị lỗi giới hạn kích thước
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Nội dung công việc
+            Row(
               children: [
-                // Nội dung công việc với icon
-                Row(
-                  children: [
-                    Icon(Icons.work, color: Colors.blue, size: 20),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        congViec.noiDungCongViec,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis, // Tránh tràn chữ
-                      ),
+                const Icon(Icons.work_outline, color: Colors.indigo),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    congViec.noiDungCongViec,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
-                SizedBox(height: 5),
-
-                // Ngày bắt đầu - Ngày kết thúc
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today, color: Colors.grey, size: 16),
-                    SizedBox(width: 5),
-                    Text(
-                      DateUtilsHelper.formatDate(congViec.ngayBatDau),
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    SizedBox(width: 10),
-                    Text("–", style: TextStyle(color: Colors.grey)),
-                    SizedBox(width: 10),
-                    Text(
-                      DateUtilsHelper.formatDate(congViec.ngayKetThuc),
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-
-                // Mức độ ưu tiên
-                Row(
-                  children: [
-                    _buildPriorityChip(congViec.mucDoUuTien),
-                  ],
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
-          ),
-
-          // Menu chức năng (Sửa/Xóa)
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'edit') {
-                onEdit(context);
-              } else if (value == 'delete') {
-                onDelete(context);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(value: 'edit', child: Text('Edit')),
-              PopupMenuItem(value: 'delete', child: Text('Delete')),
-            ],
-            icon: Icon(Icons.more_vert),
-          ),
-        ],
+            const SizedBox(height: 10),
+            // Ngày
+            Row(
+              children: [
+                _buildPriorityChip(congViec.mucDoUuTien),
+                Text(
+                  '${DateUtilsHelper.formatDate(congViec.ngayBatDau)} – ${DateUtilsHelper.formatDate(congViec.ngayKetThuc)}',
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ],
+            ),
+            SubTasksWidget(
+              congViec: congViec,
+              itemCvcs: item_cvcs,
+              onAddSubTask: (cvc) {
+               context.read<CongViecBloc>().add(InsertCVCEvent(cvc));
+              },
+              onUpdateSubTask: (cvc) {
+                context.read<CongViecBloc>().add(UpdateCVCEvent(cvc));
+              },
+              onDeleteSubTask: (id,) {
+                context.read<CongViecBloc>().add(DeleteCVCEvent(id,congViec.createBy));
+              },
+               onFileSelected: (file, task) {
+                context.read<CongViecBloc>().add(UploadFileEvent(file));
+              },
+            ),
+          ],
+        ),
       ),
-    );
+    ));
   }
 }
+
+
 
 // Widget hiển thị mức độ ưu tiên theo màu sắc
 Widget _buildPriorityChip(String priority) {
@@ -111,12 +114,12 @@ Widget _buildPriorityChip(String priority) {
     case 'Thấp':
       chipColor = Colors.green;
       label = 'Thấp';
-      icon = Icons.check_circle;
+      icon = Icons.check_circle_outline;
       break;
     case 'Trung bình':
       chipColor = Colors.orange;
       label = 'Trung bình';
-      icon = Icons.warning;
+      icon = Icons.warning_amber_rounded;
       break;
     case 'Cao':
       chipColor = Colors.red;
@@ -136,23 +139,14 @@ Widget _buildPriorityChip(String priority) {
   }
 
   return Chip(
-    label: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 20, color: Colors.white), // Tăng kích thước biểu tượng
-        SizedBox(width: 8), // Tăng khoảng cách giữa biểu tượng và văn bản
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold, // Đậm hơn
-            fontSize: 16, // Tăng kích thước chữ
-          ),
-        ),
-      ],
+    avatar: Icon(icon, size: 20, color: Colors.white),
+    label: Text(
+      label,
+      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
     ),
     backgroundColor: chipColor,
-    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Thêm padding
-    elevation: 4, // Thêm độ nổi cho chip
+    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+    elevation: 2,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   );
 }

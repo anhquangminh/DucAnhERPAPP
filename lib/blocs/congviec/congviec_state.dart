@@ -58,12 +58,30 @@ class CongViecUpdated extends CongViecState {
 class UploadFile extends CongViecState {
   final PlatformFile file;
   final String url;
-
   UploadFile(this.file, this.url);
 }
 
 class LoadCVCByIdCV extends CongViecState {
   final List<CongViecConModel> cvcs;
-
   LoadCVCByIdCV(this.cvcs);
+}
+
+class LoadCVC extends CongViecState {
+  final List<CongViecConModel> cvcs;
+  LoadCVC(this.cvcs);
+}
+
+class insertCVC_State extends CongViecState {
+  final List<CongViecConModel> cvcs;
+  insertCVC_State(this.cvcs);
+}
+
+class updateCVC_State extends CongViecState {
+  final List<CongViecConModel> cvcs;
+  updateCVC_State(this.cvcs);
+}
+
+class deleteCVC_State extends CongViecState {
+  final List<CongViecConModel> cvcs;
+  deleteCVC_State(this.cvcs);
 }

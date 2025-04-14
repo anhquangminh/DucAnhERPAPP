@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "453336866464",
+    "project_id": "ducanherp",
+    "storage_bucket": "ducanherp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453336866464:android:d836c204c63b4350a773c5",
+        "android_client_info": {
+          "package_name": "com.example.ducanherp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjq5qZgZOncCtZKcXK8P_ksyRwdyJOcDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

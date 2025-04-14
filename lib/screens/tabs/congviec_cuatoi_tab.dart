@@ -1,6 +1,7 @@
 import 'package:ducanherp/blocs/nhom_nhan_vien/nhom_nhan_vien_bloc.dart';
 import 'package:ducanherp/helpers/user_storage_helper.dart';
 import 'package:ducanherp/models/application_user.dart';
+import 'package:ducanherp/models/congvieccon_model.dart';
 import 'package:ducanherp/models/nhomnhanvien_model.dart';
 import 'package:ducanherp/utils/string_utils.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,7 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
         user = cachedUser;
       });
       final bloc = context.read<NhomNhanVienBloc>();
+      final bloc1 = context.read<CongViecBloc>();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         bloc.add(
           LoadNhomNhanVien(
@@ -43,7 +45,9 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
           ),
         );
       });
-      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        bloc1.add(LoadAllCVC_Event());
+      });
     }
   }
 
@@ -82,6 +86,7 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
   }
 
   List<NhomNhanVienModel> nhoms = [];
+  List<CongViecConModel> cvcs = [];
   NhomNhanVienModel? selectedNhom;
 
   Widget _buildContent(CongViecModel congViec) {
@@ -94,6 +99,7 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
                 nhoms = state.nhomNhanViens;
                 if (nhoms.isNotEmpty) {
                   selectedNhom = nhoms.first;
+                  congViec.nhomCongViec = nhoms.first.id;
                   context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
                 }
               });
@@ -103,6 +109,7 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
             }
           },
         ),
+       
         BlocListener<CongViecBloc, CongViecState>(
           listener: (context, state) {
             if (state is CongViecLoaded) {
@@ -110,13 +117,42 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
                 SnackBar(content: Text('Thêm công việc thành công!')),
               );
               context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
+              context.read<CongViecBloc>().add(LoadAllCVC_Event());
             }
-             if (state is CongViecUpdated) {
+            if (state is CongViecUpdated) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Cập nhật công việc thành công!')),
               );
-              context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
+              context.read<CongViecBloc>().add(LoadAllCVC_Event());
             }
+            if (state is LoadCVC) {
+              setState(() {
+                cvcs = state.cvcs;
+              });
+            }
+            if (state is deleteCVC_State) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Xóa công việc con thành công!')),
+              );
+
+              context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
+              context.read<CongViecBloc>().add(LoadAllCVC_Event());
+            }
+            if (state is updateCVC_State) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Cập nhật công việc con thành công!')),
+              );
+              context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
+              context.read<CongViecBloc>().add(LoadAllCVC_Event());
+            }
+            if (state is insertCVC_State) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Thêm công việc con thành công!')),
+              );
+              context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
+              context.read<CongViecBloc>().add(LoadAllCVC_Event());
+            }
+            
             if (state is CongViecError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Lỗi: ${state.message}')),
@@ -137,12 +173,11 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
                   )
                 : Center(child: CircularProgressIndicator());
           }
-
           if (state is CongViecByVMLoaded) {
             return Scaffold(
               backgroundColor: Colors.transparent,
               body: Padding(
-                padding: EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
+                padding: EdgeInsets.only(top: 10.0, left: 10.0, right: 10.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -212,6 +247,7 @@ class _CongViecCuaToiTabState extends State<CongViecCuaToiTab> {
                           ? Center(child: Text("Không có công việc nào."))
                           : ListCongViec(
                               items: state.congViecs,
+                              item_cvcs: cvcs,
                               onRefresh: () async {
                                 context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
                               },

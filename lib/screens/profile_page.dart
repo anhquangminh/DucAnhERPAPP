@@ -68,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
              Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -94,7 +94,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 30),
                   Card(
-                    child: ExpansionTile(
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        dividerColor: Colors.transparent, // ✅ Bỏ border mặc định
+                      ),
+                      child: ExpansionTile(
                       leading: const Icon(Icons.person),
                       title: const Text('My Profile'),
                       trailing: Icon(isProfileExpanded ? Icons.expand_less : Icons.expand_more),
@@ -118,9 +122,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ],
                     ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Card(
+                    child: Theme(
+                    data: Theme.of(context).copyWith(
+                      dividerColor: Colors.transparent, // ✅ Bỏ border mặc định
+                    ),
                     child: ExpansionTile(
                       leading: const Icon(Icons.settings),
                       title: const Text('Settings'),
@@ -130,6 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ListTile(title: Text('Theme'), leading: Icon(Icons.format_paint)),
                         ListTile(title: Text('Settings'), leading: Icon(Icons.tune)),
                       ],
+                    ),
                     ),
                   ),
                   ListTile(

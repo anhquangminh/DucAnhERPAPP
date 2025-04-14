@@ -1,3 +1,4 @@
+import 'package:ducanherp/models/congvieccon_model.dart';
 import 'package:ducanherp/models/nhanvienthuchien_model.dart';
 import 'package:ducanherp/models/themngay_model.dart';
 import 'package:equatable/equatable.dart';
@@ -78,18 +79,42 @@ class UpdateCongViecEvent extends CongViecEvent {
 
 class UploadFileEvent extends CongViecEvent {
   final PlatformFile file;
-
   const UploadFileEvent(this.file);
-
   @override
   List<Object> get props => [file];
 }
 
+
+class LoadAllCVC_Event extends CongViecEvent {
+  const LoadAllCVC_Event();
+  @override
+  List<Object> get props => [];
+}
+
 class LoadCVCByIdCVEvent extends CongViecEvent {
   final String id_CongViec;
-
   const LoadCVCByIdCVEvent(this.id_CongViec);
-
   @override
   List<Object> get props => [id_CongViec];
+}
+
+class UpdateCVCEvent extends CongViecEvent {
+  final CongViecConModel cvc;
+  const UpdateCVCEvent(this.cvc);
+  @override
+  List<Object> get props => [cvc];
+}
+
+class InsertCVCEvent extends CongViecEvent {
+  final CongViecConModel cvc;
+  const InsertCVCEvent(this.cvc);
+  @override
+  List<Object> get props => [cvc];
+}
+class DeleteCVCEvent extends CongViecEvent {
+  final String id;
+  final String userName;
+  const DeleteCVCEvent(this.id,this.userName);
+  @override
+  List<Object> get props => [id,userName];
 }

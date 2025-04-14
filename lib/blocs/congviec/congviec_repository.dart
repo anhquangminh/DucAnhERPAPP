@@ -250,6 +250,41 @@ class CongViecRepository {
     }
   }
 
+  Future<List<CongViecConModel>> LoadAllCVC() async {
+    final String? token = prefs.getString('token');
+    if (token == null) throw Exception('Token không tồn tại');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token'
+    };
+
+    final request = http.Request(
+      'GET',
+      Uri.parse(
+          '${dotenv.env['API_URL']}/api/congviec/GetAllCVC'),
+    );
+    request.headers.addAll(headers);
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final decoded = json.decode(responseBody);
+      final apiResponse = ApiResponseModel.fromJson(decoded);
+
+      if (apiResponse.success) {
+        return (apiResponse.data as List)
+            .map((e) => CongViecConModel.fromJson(e))
+            .toList();
+      } else {
+        throw Exception(apiResponse.message);
+      }
+    } else {
+      throw Exception('Lỗi server: ${response.statusCode}');
+    }
+  }
+
   Future<List<CongViecConModel>> LoadCVCByIdCV(
       String id_CongViec) async {
     final String? token = prefs.getString('token');
@@ -283,6 +318,130 @@ class CongViecRepository {
       }
     } else {
       throw Exception('Lỗi server: ${response.statusCode}');
+    }
+  }
+
+  Future<List<CongViecConModel>> UpdateCVC(
+      CongViecConModel cvc) async {
+    final String? token = prefs.getString('token');
+    if (token == null) throw Exception('Token không tồn tại');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token'
+    };
+
+    final request = http.Request(
+      'PUT',
+      Uri.parse(
+          '${dotenv.env['API_URL']}/api/congviec/UpdateCVC?userName=${prefs.getString('userName')}'),
+    );
+    request.headers.addAll(headers);
+    request.body = json.encode(cvc.toJson());
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final decoded = json.decode(responseBody);
+      final apiResponse = ApiResponseModel.fromJson(decoded);
+
+      if (apiResponse.success) {
+        return [];
+      } else {
+        throw Exception(apiResponse.message);
+      }
+    } else {
+      throw Exception('Lỗi server: ${response.statusCode}');
+    }
+  }
+
+  Future<List<CongViecConModel>> insertCVC(CongViecConModel cvc) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token == null) {
+      throw Exception('Token không tồn tại!');
+    }
+
+    final url = Uri.parse('${dotenv.env['API_URL']}/api/congviec/InsertCVC?userName=${cvc.createBy}');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final request = http.Request('POST', url)
+      ..headers.addAll(headers)
+      ..body = json.encode(cvc.toJson()); // ❌ KHÔNG encode 2 lần
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode >= 500 || response.statusCode == 404) {
+      throw Exception('Lỗi hệ thống: ${response.statusCode}');
+    }
+
+    try {
+      final decoded = json.decode(response.body);
+      final apiResponse = ApiResponseModel.fromJson(decoded);
+
+      if (apiResponse.success) {
+        // Nếu muốn parse dữ liệu trả về thành danh sách
+        final data = apiResponse.data as List<dynamic>?;
+
+        return data != null
+            ? data.map((e) => CongViecConModel.fromJson(e)).toList()
+            : [];
+      } else {
+        throw Exception(apiResponse.message);
+      }
+    } catch (e) {
+      throw Exception('Lỗi phân tích response: $e');
+    }
+  }
+
+ Future<List<CongViecConModel>> deleteCVC(String Id,String userName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token == null) {
+      throw Exception('Token không tồn tại!');
+    }
+
+    final url = Uri.parse('${dotenv.env['API_URL']}/api/congviec/DeleteByIdCVC/${Id}?userName=?userName=${userName}');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final request = http.Request('DELETE', url)
+      ..headers.addAll(headers);
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode >= 500 || response.statusCode == 404) {
+      throw Exception('Lỗi hệ thống: ${response.statusCode}');
+    }
+
+    try {
+      final decoded = json.decode(response.body);
+      final apiResponse = ApiResponseModel.fromJson(decoded);
+
+      if (apiResponse.success) {
+        // Nếu muốn parse dữ liệu trả về thành danh sách
+        final data = apiResponse.data as List<dynamic>?;
+
+        return data != null
+            ? data.map((e) => CongViecConModel.fromJson(e)).toList()
+            : [];
+      } else {
+        throw Exception(apiResponse.message);
+      }
+    } catch (e) {
+      throw Exception('Lỗi phân tích response: $e');
     }
   }
 
