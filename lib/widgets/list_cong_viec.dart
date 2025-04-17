@@ -2,6 +2,7 @@ import 'package:ducanherp/blocs/congviec/congviec_bloc.dart';
 import 'package:ducanherp/blocs/congviec/congviec_event.dart';
 import 'package:ducanherp/models/congviec_model.dart';
 import 'package:ducanherp/models/congvieccon_model.dart';
+import 'package:ducanherp/screens/danh_gia.dart';
 import 'package:ducanherp/screens/them_congviec.dart';
 import 'package:ducanherp/widgets/list_item.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,20 @@ class ListCongViec extends StatelessWidget {
           return ListItem(
             congViec: item,
             item_cvcs: cvcs,
+            onDanhGia: (context){
+               Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DanhGia(
+                    congViec: item,
+                  ),
+                ),
+              ).then((shouldRefresh) {
+                if (shouldRefresh == true) {
+                  onRefresh();
+                }
+              });
+            },
             onEdit: (context) {
               Navigator.push(
                 context,

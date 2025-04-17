@@ -14,6 +14,18 @@ class CongViecInitial extends CongViecState {}
 
 class CongViecLoading extends CongViecState {}
 
+class CongViecInsertSuccess extends CongViecState {}
+
+class CongViecDeleteSuccess extends CongViecState {}
+
+class CongViecError extends CongViecState {
+  final String message;
+  final DateTime errorTime;
+  const CongViecError(this.message, {required this.errorTime});
+  @override
+  List<Object> get props => [message, errorTime];
+}
+
 class CongViecLoaded extends CongViecState {
   final List<CongViecModel> congViecs;
   final DateTime lastUpdated;
@@ -23,14 +35,6 @@ class CongViecLoaded extends CongViecState {
   });
   @override
   List<Object> get props => [congViecs, lastUpdated];
-}
-
-class CongViecError extends CongViecState {
-  final String message;
-  final DateTime errorTime;
-  const CongViecError(this.message, {required this.errorTime});
-  @override
-  List<Object> get props => [message, errorTime];
 }
 
 class CongViecByVMLoaded extends CongViecState {
@@ -53,35 +57,49 @@ class getAllNVTHLoaded extends CongViecState {
 class CongViecUpdated extends CongViecState {
   final CongViecModel congViec;
   const CongViecUpdated(this.congViec);
+  @override
+  List<Object> get props => [congViec];
 }
 
 class UploadFile extends CongViecState {
   final PlatformFile file;
   final String url;
-  UploadFile(this.file, this.url);
+  const UploadFile(this.file, this.url);
+  @override
+  List<Object> get props => [file,url];
 }
 
-class LoadCVCByIdCV extends CongViecState {
+class LoadCVCByIdCVState extends CongViecState {
   final List<CongViecConModel> cvcs;
-  LoadCVCByIdCV(this.cvcs);
+  const LoadCVCByIdCVState(this.cvcs);
+  @override
+  List<Object> get props => [cvcs];
 }
 
-class LoadCVC extends CongViecState {
+class LoadCVCState extends CongViecState {
   final List<CongViecConModel> cvcs;
-  LoadCVC(this.cvcs);
+  const LoadCVCState(this.cvcs);
+  @override
+  List<Object> get props => [cvcs];
 }
 
-class insertCVC_State extends CongViecState {
+class InsertCVCState extends CongViecState {
   final List<CongViecConModel> cvcs;
-  insertCVC_State(this.cvcs);
+  const InsertCVCState(this.cvcs);
+  @override
+  List<Object> get props => [cvcs];
 }
 
-class updateCVC_State extends CongViecState {
+class UpdateCVCState extends CongViecState {
   final List<CongViecConModel> cvcs;
-  updateCVC_State(this.cvcs);
+  const UpdateCVCState(this.cvcs);
+  @override
+  List<Object> get props => [cvcs];
 }
 
-class deleteCVC_State extends CongViecState {
+class DeleteCVCState extends CongViecState {
   final List<CongViecConModel> cvcs;
-  deleteCVC_State(this.cvcs);
+  const DeleteCVCState(this.cvcs);
+  @override
+  List<Object> get props => [cvcs];
 }

@@ -1,9 +1,11 @@
-// Full code toi uu: ThemCongViec UI
 import 'package:ducanherp/blocs/congviec/congviec_event.dart';
 import 'package:ducanherp/blocs/congviec/congviec_state.dart';
 import 'package:ducanherp/blocs/download/download_bloc.dart';
 import 'package:ducanherp/blocs/download/download_event.dart';
 import 'package:ducanherp/blocs/download/download_state.dart';
+import 'package:ducanherp/blocs/nhanvien/nhanvien_bloc.dart';
+import 'package:ducanherp/blocs/notification/notification_bloc.dart';
+import 'package:ducanherp/blocs/notification/notification_event.dart';
 import 'package:ducanherp/widgets/custom_datepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,10 +18,9 @@ import 'package:file_picker/file_picker.dart';
 
 import '../../blocs/congviec/congviec_bloc.dart';
 import '../../blocs/congviec/congviec_event.dart' as congviec_event;
-import '../../blocs/nhan_vien/nhan_vien_bloc.dart';
-import '../../blocs/nhan_vien/nhan_vien_event.dart' as nhan_vien_event;
-import '../../blocs/nhan_vien/nhan_vien_state.dart';
-import '../../blocs/nhom_nhan_vien/nhom_nhan_vien_bloc.dart';
+import '../blocs/nhanvien/nhanvien_event.dart' as nhan_vien_event;
+import '../blocs/nhanvien/nhanvien_state.dart';
+import '../blocs/nhomnhanvien/nhomnhanvien_bloc.dart';
 import '../../helpers/user_storage_helper.dart';
 import '../../models/application_user.dart';
 import '../../models/congviec_model.dart';
@@ -189,13 +190,33 @@ class _ThemCongViecState extends State<ThemCongViec> {
                         .map((e) => e.idNhanVien)
                         .expand((ids) => ids.split(','))
                         .map((e) => e.trim())
-                        .toSet(); // dùng Set cho tối ưu
+                        .toSet();
 
                     _selectedNhanViens = nhanviens
                         .where((nv) => selectedIds.contains(nv.id))
                         .toList();
 
                     setState(() {});
+                  }
+                  if(congViecState is CongViecUpdated){
+                    List<String> listId = _selectedNhanViens.map((e) => e.id).toList();
+                     context.read<NotificationBloc>().add(
+                            SendNotificationEvent(
+                              title: "Thông báo mới",
+                              body: "Công việc đã được cập nhật:${congViecState.congViec.noiDungCongViec}",
+                              userIds: listId,
+                            ),
+                          );
+                  }
+                  if(congViecState is CongViecInsertSuccess){
+                    List<String> listId = _selectedNhanViens.map((e) => e.id).toList();
+                     context.read<NotificationBloc>().add(
+                            SendNotificationEvent(
+                              title: "Thông báo mới",
+                              body: "Công việc đã được cập nhật:${newTask.noiDungCongViec}",
+                              userIds: listId,
+                            ),
+                          );
                   }
                 },
                 child: BlocListener<NhanVienBloc, NhanVienState>(
@@ -212,7 +233,7 @@ class _ThemCongViecState extends State<ThemCongViec> {
                             createAt: DateTime.now(),
                             isActive: 1);
                         context.read<CongViecBloc>().add(congviec_event
-                            .getAllNVTH(newTask.groupId, nvthModel));
+                            .GetAllNVTH(newTask.groupId, nvthModel));
                       }
                       setState(() {});
                     } else if (state is NhanVienError) {
@@ -441,8 +462,7 @@ class _ThemCongViecState extends State<ThemCongViec> {
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text(
-                              'Lỗi tải danh sách công việc: ${state.message}')),
+                          content: Text('Lỗi tải danh sách công việc: ${state.message}')),
                     );
                   }
                 },
@@ -576,6 +596,7 @@ class _ThemCongViecState extends State<ThemCongViec> {
                               nhanViens: nhanVienIds,
                             ),
                           );
+                          
                         }
                       }
                     },

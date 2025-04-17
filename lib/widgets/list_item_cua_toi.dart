@@ -6,6 +6,7 @@ import 'package:ducanherp/blocs/congviec/congviec_bloc.dart';
 import 'package:ducanherp/blocs/congviec/congviec_event.dart';
 import 'package:ducanherp/blocs/congviec/congviec_state.dart';
 import 'package:ducanherp/models/themngay_model.dart';
+import 'package:ducanherp/widgets/custom_button.dart';
 import 'package:ducanherp/widgets/custom_dropdown_form_field.dart';
 import 'package:ducanherp/widgets/custom_text_area.dart';
 import 'package:ducanherp/widgets/custom_text_form_field.dart';
@@ -187,7 +188,7 @@ Future<bool?> _showCongViecModal(
     builder: (context) {
       return BlocListener<CongViecBloc, CongViecState>(
         listener: (context, state) {
-          if (state is LoadCVC) {
+          if (state is LoadCVCState) {
             context.read<CongViecBloc>().add(LoadCVCByIdCVEvent(congViec.id));
             if (onRefresh != null) onRefresh();
             ScaffoldMessenger.of(context).showSnackBar(
@@ -301,7 +302,10 @@ Future<bool?> _showCongViecModal(
                           SizedBox(height: 10),
                           BlocBuilder<CongViecBloc, CongViecState>(
                             builder: (context, state) {
-                              if (state is LoadCVCByIdCV && state.cvcs.isNotEmpty) {
+                              if (state is UpdateCVCState) {
+                                 context.read<CongViecBloc>().add(LoadCVCByIdCVEvent(congViec.id));
+                              }
+                              if (state is LoadCVCByIdCVState && state.cvcs.isNotEmpty) {
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -396,25 +400,31 @@ Future<bool?> _showCongViecModal(
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              ElevatedButton(
-                                onPressed: () async {
-                                  Navigator.pop(context, true);
-                                  if (onRefresh != null) await onRefresh();
-                                },
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                                child: Text('Hủy'),
+                              Expanded(
+                                child: CustomButton(
+                                  label: 'Hủy',
+                                  backgroundColor: Colors.grey,
+                                  onPressed: () async {
+                                    Navigator.pop(context, true);
+                                    if (onRefresh != null) await onRefresh();
+                                  },
+                                ),
                               ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<CongViecBloc>().add(
-                                        congviec_event.UpdateCongViecEvent(
-                                          congViec: congViec,
-                                          themNgay: themNgay,
-                                          nhanViens: [],
-                                        ),
-                                      );
-                                },
-                                child: Text('Lưu'),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomButton(
+                                  label: 'Lưu',
+                                  backgroundColor: Colors.blue,
+                                  onPressed: (){
+                                    context.read<CongViecBloc>().add(
+                                      congviec_event.UpdateCongViecEvent(
+                                        congViec: congViec,
+                                        themNgay: themNgay,
+                                        nhanViens: [],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ],
                           ),

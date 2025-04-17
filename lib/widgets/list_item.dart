@@ -12,6 +12,7 @@ import 'package:ducanherp/widgets/sub_tasks_widget.dart';
 class ListItem extends StatelessWidget {
   final CongViecModel congViec;
   final List<CongViecConModel> item_cvcs;
+  final Function(BuildContext) onDanhGia;
   final Function(BuildContext) onEdit;
   final Function(BuildContext) onDelete;
 
@@ -19,6 +20,7 @@ class ListItem extends StatelessWidget {
     super.key,
     required this.item_cvcs,
     required this.congViec,
+    required this.onDanhGia,
     required this.onEdit,
     required this.onDelete,
   });
@@ -30,6 +32,12 @@ class ListItem extends StatelessWidget {
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
         children: [
+          SlidableAction(
+            onPressed: (context) => onDanhGia(context),
+            backgroundColor: Colors.cyanAccent,
+            icon: Icons.edit_calendar_outlined,
+            label: 'Đánh giá',
+          ),
           SlidableAction(
             onPressed: (context) => onEdit(context),
             backgroundColor: Colors.teal,
@@ -74,8 +82,8 @@ class ListItem extends StatelessWidget {
               children: [
                 _buildPriorityChip(congViec.mucDoUuTien),
                 Text(
-                  '${DateUtilsHelper.formatDate(congViec.ngayBatDau)} – ${DateUtilsHelper.formatDate(congViec.ngayKetThuc)}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                  '${DateUtilsHelper.formatDateCustom(congViec.ngayBatDau,"dd/MM/yy")} – ${DateUtilsHelper.formatDateCustom(congViec.ngayKetThuc,"dd/MM/yy")}',
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
                 ),
               ],
             ),
@@ -101,8 +109,6 @@ class ListItem extends StatelessWidget {
     ));
   }
 }
-
-
 
 // Widget hiển thị mức độ ưu tiên theo màu sắc
 Widget _buildPriorityChip(String priority) {
@@ -150,3 +156,4 @@ Widget _buildPriorityChip(String priority) {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   );
 }
+

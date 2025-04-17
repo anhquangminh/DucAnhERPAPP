@@ -21,12 +21,12 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
     on<DeleteCongViec>(_onDeleteCongViec);
     on<RefreshCongViec>(_onRefreshCongViec);
     on<GetCongViecByVM>(_onGetCongViecByVM);
-    on<getAllNVTH>(_onGetAllNVTH);
+    on<GetAllNVTH>(_onGetAllNVTH);
     on<UploadFileEvent>(_onUploadFile);
     on<LoadCVCByIdCVEvent>(_onLoadCVCByIdCV);
     on<UpdateCVCEvent>(_onUpdateCVC);
     on<InsertCVCEvent>(_onInsertCVC);
-    on<LoadAllCVC_Event>(_onLoadAllCVC);
+    on<LoadAllCVCEvent>(_onLoadAllCVC);
     on<DeleteCVCEvent>(_onDeleteCVC);
   }
 
@@ -66,7 +66,7 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
         event.themNgay,
         event.nhanViens,
       );
-
+      emit(CongViecInsertSuccess());
       // Nếu trước đó là CongViecLoaded thì thêm vào danh sách cũ
       if (currentState is CongViecLoaded) {
         emit(CongViecLoaded(
@@ -121,6 +121,7 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
           final updatedList = currentState.congViecs
               .where((congViec) => congViec.id != event.id)
               .toList();
+          emit(CongViecDeleteSuccess());
           emit(CongViecByVMLoaded(
               congViecs: updatedList, groupId: currentState.groupId));
         } else {
@@ -186,7 +187,7 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
   }
 
   Future<void> _onGetAllNVTH(
-    getAllNVTH event,
+    GetAllNVTH event,
     Emitter<CongViecState> emit,
   ) async {
     try {
@@ -218,12 +219,12 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
 
 
   Future<void> _onLoadAllCVC(
-    LoadAllCVC_Event event,
+    LoadAllCVCEvent event,
     Emitter<CongViecState> emit,
   ) async {
       try {
         final congViecs = await repository.LoadAllCVC();
-        emit(LoadCVC(
+        emit(LoadCVCState(
            congViecs,
         ));
       } catch (e) {
@@ -240,8 +241,8 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
     Emitter<CongViecState> emit,
   ) async {
     try {
-      final cvc_repository = await repository.LoadCVCByIdCV(event.id_CongViec);
-      emit(LoadCVCByIdCV(
+      final cvc_repository = await repository.LoadCVCByIdCV(event.idCongViec);
+      emit(LoadCVCByIdCVState(
         cvc_repository,
       ));
     } catch (e) {
@@ -258,7 +259,7 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
   ) async {
     try {
       final cvc_repository = await repository.UpdateCVC(event.cvc);
-      emit(updateCVC_State(
+      emit(UpdateCVCState(
         cvc_repository,
       ));
     } catch (e) {
@@ -276,7 +277,7 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
     try {
       event.cvc.id="";
       final cvc_repository = await repository.insertCVC(event.cvc);
-      emit(insertCVC_State(
+      emit(InsertCVCState(
         cvc_repository,
       ));
     } catch (e) {
@@ -292,7 +293,7 @@ class CongViecBloc extends Bloc<CongViecEvent, CongViecState> {
   ) async {
     try {
       final cvc_repository = await repository.deleteCVC(event.id,event.userName);
-      emit(deleteCVC_State(
+      emit(DeleteCVCState(
         cvc_repository,
       ));
     } catch (e) {

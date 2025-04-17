@@ -42,7 +42,7 @@ class _SubTasksWidgetState extends State<SubTasksWidget> {
       children: [
         if (widget.itemCvcs.isEmpty)
           const Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(1),
             child: Text('Không có công việc con nào'),
           )
         else

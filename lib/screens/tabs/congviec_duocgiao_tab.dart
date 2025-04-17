@@ -1,4 +1,4 @@
-import 'package:ducanherp/blocs/nhom_nhan_vien/nhom_nhan_vien_bloc.dart';
+import 'package:ducanherp/blocs/nhomnhanvien/nhomnhanvien_bloc.dart';
 import 'package:ducanherp/helpers/user_storage_helper.dart';
 import 'package:ducanherp/models/application_user.dart';
 import 'package:ducanherp/models/nhomnhanvien_model.dart';
@@ -10,7 +10,6 @@ import 'package:ducanherp/blocs/congviec/congviec_bloc.dart';
 import 'package:ducanherp/blocs/congviec/congviec_state.dart';
 import 'package:ducanherp/blocs/congviec/congviec_event.dart';
 import 'package:ducanherp/models/congviec_model.dart';
-import 'package:ducanherp/screens/them_congviec.dart';
 
 class CongViecDuocGiaoTab extends StatefulWidget {
   const CongViecDuocGiaoTab({super.key});
@@ -203,11 +202,6 @@ class _CongViecDuocGiaoTabState extends State<CongViecDuocGiaoTab> {
                         },
                       ),
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Danh sách',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
                     SizedBox(height: 10),
                     Expanded(
                       child: state.congViecs.isEmpty
@@ -224,23 +218,7 @@ class _CongViecDuocGiaoTabState extends State<CongViecDuocGiaoTab> {
                   ],
                 ),
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ThemCongViec()),
-                  ).then((shouldRefresh) {
-                    if (shouldRefresh == true && mounted) {
-                      context.read<CongViecBloc>().add(GetCongViecByVM(congViec));
-                    }
-                  });
-                },
-                backgroundColor: Colors.cyanAccent,
-                elevation: 0,
-                tooltip: 'Thêm công việc mới',
-                child: Icon(Icons.add, size: 30, color: Color.fromARGB(255, 57, 11, 122)),
-                shape: CircleBorder(),
-              ),
+              
             );
           }
 
