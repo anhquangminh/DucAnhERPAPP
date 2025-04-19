@@ -4,6 +4,10 @@ import 'package:ducanherp/blocs/danhgia/danhgia_reponsitory.dart';
 import 'package:ducanherp/blocs/notification/notification_event.dart';
 import 'package:ducanherp/blocs/notification/notification_reponsitory.dart';
 import 'package:ducanherp/blocs/notification/notification_bloc.dart';
+import 'package:ducanherp/blocs/permission/permission_bloc.dart';
+import 'package:ducanherp/blocs/permission/permission_event.dart';
+import 'package:ducanherp/blocs/permission/permission_repository.dart';
+import 'package:ducanherp/blocs/permission/permission_state.dart';
 import 'package:ducanherp/helpers/user_storage_helper.dart';
 import 'package:ducanherp/screens/home_screen.dart';
 import 'package:ducanherp/screens/login_screen.dart';
@@ -58,6 +62,7 @@ Future<void> main() async {
         BlocProvider(create: (_) => NhomNhanVienBloc(client: client, prefs: prefs)),
         BlocProvider(create: (_) => DownloadBloc()),
         BlocProvider(create: (_) => DanhGiaBloc(DanhGiaRepository(prefs))),
+        BlocProvider(create: (_) => PermissionBloc(PermissionRepository(client: client, prefs: prefs))),
         BlocProvider(create: (_) => NotificationBloc(repository: NotificationRepository(client: client, prefs: prefs),),
         ),
       ],
@@ -76,34 +81,66 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _initFirebaseMessaging();
-    _checkLoginAndRedirect();
+    _checkLoginAndRedirect().then((isLoggedIn) {
+      if (isLoggedIn) {
+        _initFirebaseMessaging();
+      }
+    });
   }
 
   // Kiểm tra token, expiration và user, nếu hợp lệ chuyển đến HomeScreen
-  Future<void> _checkLoginAndRedirect() async {
+  Future<bool> _checkLoginAndRedirect() async {
     final prefs = await SharedPreferences.getInstance();
     final savedToken = prefs.getString('token');
     final expiration = prefs.getString('expiration');
     final user = await UserStorageHelper.getCachedUserInfo();
 
-    if (savedToken != null && expiration != null && user != null && user.id.isNotEmpty) {
-      DateTime expDate = DateTime.tryParse(expiration) ?? DateTime(0);
+    // Nếu không có token → chuyển về LoginScreen
+    if (savedToken == null) {
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+      return false;
+    }
+
+    if (expiration != null && user != null && user.id.isNotEmpty) {
+      final expDate = DateTime.tryParse(expiration) ?? DateTime(0);
       if (expDate.isAfter(DateTime.now())) {
-        // Nếu token còn hạn, chuyển sang HomeScreen ngay
+        final permissionsDate = prefs.getString('permissions_date');
+        final now = DateTime.now();
+
+        if (permissionsDate == null || DateTime.tryParse(permissionsDate)?.day != now.day) {
+          final permissionBloc = BlocProvider.of<PermissionBloc>(context);
+          permissionBloc.add(FetchPermissions(
+            groupId: user.groupId,
+            userId: user.id,
+            parentMajorId: "249ff511-8f10-45e8-bf8f-29b0ada5ab84",
+          ));
+
+          final permState = await permissionBloc.stream
+              .firstWhere((state) => state is PermissionLoaded) as PermissionLoaded;
+
+          final permissionJsonList = permState.permissions.map((p) => jsonEncode(p.toJson())).toList();
+          await prefs.setStringList('permissions', permissionJsonList);
+          await prefs.setString('permissions_date', now.toIso8601String());
+        }
+
         navigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => HomeScreen()),
           (route) => false,
         );
+        return true;
       } else {
-        // Token hết hạn: xóa token, chuyển sang LoginScreen
         await prefs.remove('token');
-        navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
       }
     }
+
+    navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+    return false;
   }
 
   void _initFirebaseMessaging() async {
@@ -145,8 +182,19 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: navigatorKey,
       title: 'Ducanherp',
       theme: ThemeData(primarySwatch: Colors.purple),
-      // Màn hình mặc định tại đây có thể là LoginScreen vì trang chuyển hướng sẽ được thực hiện ở _checkLoginAndRedirect()
-      home: const LoginScreen(),
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo.png', height: 100),
+              SizedBox(height: 20),
+              CircularProgressIndicator(),
+            ],
+          ),
+        ),
+      ),
       onGenerateRoute: (settings) {
         if (settings.name == '/page_notification') {
           final message = settings.arguments as RemoteMessage?;

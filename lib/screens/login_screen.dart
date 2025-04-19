@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:ducanherp/blocs/notification/notification_bloc.dart';
 import 'package:ducanherp/blocs/notification/notification_event.dart';
+import 'package:ducanherp/blocs/permission/permission_bloc.dart';
+import 'package:ducanherp/blocs/permission/permission_event.dart';
+import 'package:ducanherp/blocs/permission/permission_state.dart';
 import 'package:ducanherp/helpers/user_storage_helper.dart';
 import 'package:ducanherp/screens/home_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -74,20 +79,39 @@ class _LoginScreenState extends State<LoginScreen> {
             final fcmToken = await FirebaseMessaging.instance.getToken();
             final user = await UserStorageHelper.getCachedUserInfo();
 
-            if (fcmToken != null && user != null && user.id.isNotEmpty) {
+            if (fcmToken != null && user != null && user.id.isNotEmpty && user.groupId != "") {
               context.read<NotificationBloc>().add(
-                    RegisterTokenEvent(
-                      token: fcmToken,
-                      groupId: user.groupId,
-                      userId: user.id,
-                    ),
-                  );
-            }
+                RegisterTokenEvent(
+                  token: fcmToken,
+                  groupId: user.groupId,
+                  userId: user.id,
+                ),
+              );
 
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
-            );
+              final permissionBloc = BlocProvider.of<PermissionBloc>(context);
+              permissionBloc.add(FetchPermissions(
+                groupId: user.groupId,
+                userId: user.id,
+                parentMajorId: "249ff511-8f10-45e8-bf8f-29b0ada5ab84",
+              ));
+
+              permissionBloc.stream.firstWhere((permState) => permState is PermissionLoaded).then((permState) async {
+                final permissions = (permState as PermissionLoaded).permissions;
+
+                final prefs = await SharedPreferences.getInstance();
+                final permissionJsonList = permissions.map((p) => jsonEncode(p.toJson())).toList();
+                await prefs.setStringList('permissions', permissionJsonList);
+
+                final now = DateTime.now();
+                await prefs.setString('permissions_date', now.toIso8601String());
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                );
+              });
+
+            }
           }
         },
         child: Padding(

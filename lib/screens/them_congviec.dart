@@ -4,8 +4,6 @@ import 'package:ducanherp/blocs/download/download_bloc.dart';
 import 'package:ducanherp/blocs/download/download_event.dart';
 import 'package:ducanherp/blocs/download/download_state.dart';
 import 'package:ducanherp/blocs/nhanvien/nhanvien_bloc.dart';
-import 'package:ducanherp/blocs/notification/notification_bloc.dart';
-import 'package:ducanherp/blocs/notification/notification_event.dart';
 import 'package:ducanherp/widgets/custom_datepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -198,26 +196,8 @@ class _ThemCongViecState extends State<ThemCongViec> {
 
                     setState(() {});
                   }
-                  if(congViecState is CongViecUpdated){
-                    List<String> listId = _selectedNhanViens.map((e) => e.id).toList();
-                     context.read<NotificationBloc>().add(
-                            SendNotificationEvent(
-                              title: "Thông báo mới",
-                              body: "Công việc đã được cập nhật:${congViecState.congViec.noiDungCongViec}",
-                              userIds: listId,
-                            ),
-                          );
-                  }
-                  if(congViecState is CongViecInsertSuccess){
-                    List<String> listId = _selectedNhanViens.map((e) => e.id).toList();
-                     context.read<NotificationBloc>().add(
-                            SendNotificationEvent(
-                              title: "Thông báo mới",
-                              body: "Công việc đã được cập nhật:${newTask.noiDungCongViec}",
-                              userIds: listId,
-                            ),
-                          );
-                  }
+                 
+                 
                 },
                 child: BlocListener<NhanVienBloc, NhanVienState>(
                   listener: (context, state) {

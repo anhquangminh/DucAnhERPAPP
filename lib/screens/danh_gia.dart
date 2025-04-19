@@ -204,6 +204,36 @@ class _DanhGiaState extends State<DanhGia> {
                       ),
                     ],
                   ),
+                   TableRow(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'Tự đánh giá:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(widget.congViec.tuDanhGia),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'Tiến độ:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(widget.congViec.tienDo.toString()),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
@@ -227,9 +257,9 @@ class _DanhGiaState extends State<DanhGia> {
                       _ghiChuController.text = danhgia.ghiChu ?? '';
                     });
                   } else if (state is DanhGiaError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(content: Text(state.message)),
+                    // );
                   } else if (state is DanhGiaSuccess) {
                     Navigator.pop(context, true); // Quay lại màn hình trước đó
                   }

@@ -62,37 +62,35 @@ class ListCongViec extends StatelessWidget {
               });
             },
             onDelete: (context) async {
+              // 👉 Lưu trước bloc và scaffoldMessenger
+              final congViecBloc = context.read<CongViecBloc>();
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+
               final confirmed = await showDialog<bool>(
                 context: context,
-                builder: (context) => AlertDialog(
+                builder: (dialogContext) => AlertDialog(
                   title: Text('Xác nhận xóa'),
                   content: Text('Bạn có chắc chắn muốn xóa công việc "${item.noiDungCongViec}"?'),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: () => Navigator.pop(dialogContext, false),
                       child: Text('Hủy'),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.pop(context, true),
+                      onPressed: () => Navigator.pop(dialogContext, true),
                       child: Text('Xóa', style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 ),
               );
-
               if (confirmed == true) {
-                // Get the CongViecBloc from context
-                final congViecBloc = context.read<CongViecBloc>();
-                
-                // Dispatch DeleteCongViec event
-                congViecBloc.add(DeleteCongViec(item.id));
-                
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Đã xóa "${item.noiDungCongViec}"'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                  congViecBloc.add(DeleteCongViec(item.id));
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Đã xóa "${item.noiDungCongViec}"'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
               }
             },
           );

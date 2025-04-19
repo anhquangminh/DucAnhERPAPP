@@ -73,7 +73,7 @@ class DanhGiaRepository {
   }
 
   Future<DanhGiaModel> _handleResponse(http.Response response) async {
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       final decoded = json.decode(response.body);
       final apiResponse = ApiResponseModel.fromJson(decoded);
 
